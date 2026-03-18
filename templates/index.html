@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional CRUD Python</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciador de Itens</h1>
+
+        <form action="/add" method="POST" class="form-group">
+            <input type="text" name="name" placeholder="Nome do Produto" class="input-field" required>
+            <input type="text" name="description" placeholder="Descrição" class="input-field">
+            <input type="number" step="0.01" name="price" placeholder="Preço" class="input-field" required>
+            <button type="submit" class="btn btn-primary">Adicionar Item</button>
+        </form>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Descrição</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><strong>{{ item.name }}</strong></td>
+                        <td>{{ item.description }}</td>
+                        <td class="price-tag">R$ {{ "%.2f"|format(item.price) }}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="editItem({{ item.to_dict() | tojson }})">Editar</button>
+                            <a href="/delete/{{ item.id }}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function editItem(item) {
+            const form = document.querySelector('.form-group');
+            const btn = form.querySelector('button');
+            
+            form.action = `/update/${item.id}`;
+            form.querySelector('input[name="name"]').value = item.name;
+            form.querySelector('input[name="description"]').value = item.description;
+            form.querySelector('input[name="price"]').value = item.price;
+            
+            btn.textContent = 'Salvar Alterações';
+            btn.classList.replace('btn-primary', 'btn-accent');
+            
+            // Add a cancel button if not exists
+            if (!document.getElementById('cancel-edit')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.id = 'cancel-edit';
+                cancelBtn.type = 'button';
+                cancelBtn.className = 'btn';
+                cancelBtn.style.background = 'rgba(255,255,255,0.1)';
+                cancelBtn.style.color = 'white';
+                cancelBtn.textContent = 'Cancelar';
+                cancelBtn.onclick = () => {
+                    form.action = '/add';
+                    form.reset();
+                    btn.textContent = 'Adicionar Item';
+                    btn.classList.replace('btn-accent', 'btn-primary');
+                    cancelBtn.remove();
+                };
+                form.appendChild(cancelBtn);
+            }
+        }
+    </script>
+</body>
+</html>
