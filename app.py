@@ -4,8 +4,8 @@ import os
 
 app = Flask(__name__)
 
-# Database Configuration
-db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database.db')
+# Database Configuration — use /tmp so Vercel's read-only filesystem doesn't block writes
+db_path = '/tmp/database.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
